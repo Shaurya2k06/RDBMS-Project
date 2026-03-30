@@ -16,6 +16,7 @@ DROP TABLE IF EXISTS screen_2d CASCADE;
 DROP TABLE IF EXISTS screen_3d CASCADE;
 DROP TABLE IF EXISTS screen_4d CASCADE;
 DROP TABLE IF EXISTS imax_screens CASCADE;
+DROP TABLE IF EXISTS vip_seats CASCADE;
 DROP TABLE IF EXISTS recliner_seats CASCADE;
 DROP TABLE IF EXISTS premium_seats CASCADE;
 DROP TABLE IF EXISTS regular_seats CASCADE;
@@ -30,7 +31,7 @@ DROP TABLE IF EXISTS seats CASCADE;
 CREATE TABLE seats (
   seat_id    SERIAL PRIMARY KEY,
   seat_no    VARCHAR(10)  NOT NULL,
-  seat_type  VARCHAR(20)  NOT NULL CHECK (seat_type IN ('Regular','Premium','Recliner')),
+  seat_type  VARCHAR(20)  NOT NULL CHECK (seat_type IN ('Regular','Premium','Recliner','VIP')),
   seat_price NUMERIC(8,2) NOT NULL
 );
 
@@ -47,6 +48,11 @@ CREATE TABLE premium_seats (
 CREATE TABLE recliner_seats (
   seat_id        INT PRIMARY KEY REFERENCES seats(seat_id) ON DELETE CASCADE,
   rec_seat_price NUMERIC(8,2) NOT NULL
+);
+
+CREATE TABLE vip_seats (
+  seat_id        INT PRIMARY KEY REFERENCES seats(seat_id) ON DELETE CASCADE,
+  vip_seat_price NUMERIC(8,2) NOT NULL
 );
 
 -- ============================================================
@@ -92,7 +98,7 @@ CREATE TABLE screen_2d (
 CREATE TABLE shows (
   show_id       SERIAL PRIMARY KEY,
   show_name     VARCHAR(200) NOT NULL,
-  show_date     DATE         NOT NULL,
+  show_date     DATE         DEFAULT CURRENT_DATE,
   show_duration INT          NOT NULL,  -- minutes
   show_language VARCHAR(50)  NOT NULL,
   rating_type   VARCHAR(20)
@@ -127,7 +133,7 @@ CREATE TABLE customers (
   cust_id    SERIAL PRIMARY KEY,
   first_name VARCHAR(100) NOT NULL,
   last_name  VARCHAR(100) NOT NULL,
-  phone_no   VARCHAR(15),
+  phone_no   VARCHAR(50),
   dob        DATE
 );
 
@@ -148,7 +154,8 @@ CREATE TABLE bookings (
 CREATE TABLE reviews (
   review_id SERIAL PRIMARY KEY,
   cust_id   INT NOT NULL REFERENCES customers(cust_id) ON DELETE CASCADE,
-  rating    INT NOT NULL CHECK (rating >= 1 AND rating <= 5)
+  show_id   INT NOT NULL REFERENCES shows(show_id) ON DELETE CASCADE,
+  rating    INT NOT NULL CHECK (rating >= 1 AND rating <= 10)
 );
 
 -- ============================================================

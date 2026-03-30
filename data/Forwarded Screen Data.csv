@@ -1,0 +1,21 @@
+screen_no,screen_status,seat_count,screen_size,screen_type
+1,Out of order,169,960,IMAX
+2,Out of order,293,2136,IMAX
+3,Available,138,1360,2-D
+4,Under Maintenance,296,960,IMAX
+5,Under Maintenance,59,1470,3-D
+6,Show Playing,152,1360,2-D
+7,Show Playing,274,2136,4-D
+8,Out of order,57,1360,IMAX
+9,Available,22,2136,4-D
+10,Under Maintenance,245,1360,3-D
+11,Under Maintenance,156,960,IMAX
+12,Available,3,2136,2-D
+13,Out of order,260,1470,4-D
+14,Under Maintenance,271,960,2-D
+15,Show Playing,147,1470,IMAX
+16,Available,259,960,4-D
+17,Out of order,30,2136,IMAX
+18,Under Maintenance,288,1360,3-D
+19,Under Maintenance,35,960,4-D
+20,Show Playing,15,1470,IMAX
