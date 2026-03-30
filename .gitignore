@@ -80,4 +80,3 @@ coverage/
 .cache
 
 test-scripts/
-.env.prodcutionclient/.env.production
