@@ -1,0 +1,51 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+
+  --color-nb-bg: #F7F5F2;
+  --color-nb-ink: #111111;
+  --color-nb-accent: #6EE7B7;
+  --color-nb-accent-2: #60A5FA;
+  --color-nb-warn: #F59E0B;
+  --color-nb-error: #EF4444;
+  --color-nb-ok: #10B981;
+  --color-nb-card: #FFFFFF;
+  --color-nb-purple: #A78BFA;
+  --color-nb-pink: #F472B6;
+  --color-nb-yellow: #FDE68A;
+
+  --shadow-nb: 8px 8px 0 0 rgba(0,0,0,0.9);
+  --shadow-nb-sm: 4px 4px 0 0 rgba(0,0,0,0.9);
+  --shadow-nb-lg: 12px 12px 0 0 rgba(0,0,0,0.9);
+
+  --radius-nb: 1.25rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-nb-bg);
+  color: var(--color-nb-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5.display {
+  font-family: var(--font-display);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--color-nb-bg); }
+::-webkit-scrollbar-thumb { background: var(--color-nb-ink); border-radius: 4px; }
+
+/* Focus ring */
+*:focus-visible {
+  outline: 3px solid var(--color-nb-ink);
+  outline-offset: 2px;
+}
