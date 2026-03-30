@@ -9,11 +9,13 @@ router.get("/", async (req, res) => {
       SELECT s.*,
              r.reg_seat_price,
              p.pre_seat_price,
-             rc.rec_seat_price
+             rc.rec_seat_price,
+             v.vip_seat_price
       FROM seats s
       LEFT JOIN regular_seats  r  ON s.seat_id = r.seat_id
       LEFT JOIN premium_seats  p  ON s.seat_id = p.seat_id
       LEFT JOIN recliner_seats rc ON s.seat_id = rc.seat_id
+      LEFT JOIN vip_seats      v  ON s.seat_id = v.seat_id
       ORDER BY s.seat_id
     `;
     res.json(seats);
@@ -29,11 +31,13 @@ router.get("/:id", async (req, res) => {
       SELECT s.*,
              r.reg_seat_price,
              p.pre_seat_price,
-             rc.rec_seat_price
+             rc.rec_seat_price,
+             v.vip_seat_price
       FROM seats s
       LEFT JOIN regular_seats  r  ON s.seat_id = r.seat_id
       LEFT JOIN premium_seats  p  ON s.seat_id = p.seat_id
       LEFT JOIN recliner_seats rc ON s.seat_id = rc.seat_id
+      LEFT JOIN vip_seats      v  ON s.seat_id = v.seat_id
       WHERE s.seat_id = ${req.params.id}
     `;
     if (!seat) return res.status(404).json({ error: "Seat not found" });
@@ -60,6 +64,8 @@ router.post("/", async (req, res) => {
       await sql`INSERT INTO premium_seats (seat_id, pre_seat_price) VALUES (${seat.seat_id}, ${seat_price})`;
     } else if (seat_type === "Recliner") {
       await sql`INSERT INTO recliner_seats (seat_id, rec_seat_price) VALUES (${seat.seat_id}, ${seat_price})`;
+    } else if (seat_type === "VIP") {
+      await sql`INSERT INTO vip_seats (seat_id, vip_seat_price) VALUES (${seat.seat_id}, ${seat_price})`;
     }
 
     res.status(201).json(seat);
