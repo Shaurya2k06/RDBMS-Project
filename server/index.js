@@ -6,7 +6,11 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'https://cinedb.vercel.app'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // Route modules
@@ -25,7 +29,11 @@ app.use("/api/customers", customersRouter);
 app.use("/api/bookings", bookingsRouter);
 app.use("/api/reviews", reviewsRouter);
 
-// Health check
+// Health check for cronjob and general monitoring
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
+
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
