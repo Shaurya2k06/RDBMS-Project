@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Users, Trash2, Eye, Phone, Calendar, BookOpen, Star } from "lucide-react";
+import { Plus, Users, Trash2, Eye, Phone, Calendar, BookOpen, Star, Pencil } from "lucide-react";
 import { customersApi } from "@/lib/api";
 import { NBCard } from "@/components/NBCard";
 import { NBButton } from "@/components/NBButton";
 import { StatPill } from "@/components/StatPill";
 import { LoadingSpinner, EmptyState, ErrorState } from "@/components/States";
 
-function CustomerDetailModal({ cust, onClose, onDelete }) {
+function CustomerDetailModal({ cust, onClose, onDelete, onEdit }) {
   const [bookings, setBookings] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [tab, setTab] = useState("info");
@@ -82,6 +82,7 @@ function CustomerDetailModal({ cust, onClose, onDelete }) {
           </div>
         )}
         <div className="flex gap-3 justify-end mt-5">
+          <NBButton variant="ghost" icon={Pencil} onClick={() => onEdit(cust)}>Edit</NBButton>
           <NBButton variant="ghost" onClick={onClose}>Close</NBButton>
           <NBButton variant="danger" icon={Trash2} onClick={() => onDelete(cust.cust_id)}>Delete</NBButton>
         </div>
@@ -90,19 +91,28 @@ function CustomerDetailModal({ cust, onClose, onDelete }) {
   );
 }
 
-function AddCustomerModal({ onClose, onCreated }) {
+function CustomerFormModal({ title, submitLabel, initialCustomer, onClose, onSubmit }) {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ first_name: "", last_name: "", phone_no: "", dob: "" });
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
   const inputCls = "w-full border-2 border-nb-ink rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-4 focus:ring-nb-accent/50";
   const labelCls = "block text-xs font-bold uppercase tracking-wide text-nb-ink/60 mb-1";
 
+  useEffect(() => {
+    setForm({
+      first_name: initialCustomer?.first_name || "",
+      last_name: initialCustomer?.last_name || "",
+      phone_no: initialCustomer?.phone_no || "",
+      dob: initialCustomer?.dob ? new Date(initialCustomer.dob).toISOString().slice(0, 10) : "",
+    });
+  }, [initialCustomer]);
+
   const handleSubmit = async () => {
     if (!form.first_name || !form.last_name) { toast.error("Name is required"); return; }
     setLoading(true);
     try {
-      await customersApi.create(form);
-      toast.success("Customer added!"); onCreated(); onClose();
+      await onSubmit(form);
+      onClose();
     } catch (e) { toast.error("Failed: " + e.message); }
     finally { setLoading(false); }
   };
@@ -111,7 +121,7 @@ function AddCustomerModal({ onClose, onCreated }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
       <div className="bg-white border-2 border-nb-ink rounded-2xl p-6 max-w-sm w-full"
         style={{ boxShadow: "var(--shadow-nb)" }} onClick={e => e.stopPropagation()}>
-        <h2 className="text-xl font-display font-bold mb-5">Add Customer</h2>
+        <h2 className="text-xl font-display font-bold mb-5">{title}</h2>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div><label className={labelCls}>First Name</label><input className={inputCls} value={form.first_name} onChange={e => set("first_name", e.target.value)} /></div>
@@ -122,7 +132,7 @@ function AddCustomerModal({ onClose, onCreated }) {
         </div>
         <div className="flex gap-3 mt-6 justify-end">
           <NBButton variant="ghost" onClick={onClose}>Cancel</NBButton>
-          <NBButton variant="primary" onClick={handleSubmit} disabled={loading}>{loading ? "Saving..." : "Add Customer"}</NBButton>
+          <NBButton variant="primary" onClick={handleSubmit} disabled={loading}>{loading ? "Saving..." : submitLabel}</NBButton>
         </div>
       </div>
     </div>
@@ -135,6 +145,7 @@ export default function CustomersPage() {
   const [error, setError] = useState(null);
   const [selected, setSelected] = useState(null);
   const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState(null);
   const [search, setSearch] = useState("");
 
   const load = async () => {
@@ -149,6 +160,19 @@ export default function CustomersPage() {
   const handleDelete = async (id) => {
     try { await customersApi.delete(id); toast.success("Customer deleted!"); setSelected(null); load(); }
     catch (e) { toast.error("Failed: " + e.message); }
+  };
+
+  const handleCreate = async (data) => {
+    await customersApi.create(data);
+    toast.success("Customer added!");
+    load();
+  };
+
+  const handleUpdate = async (id, data) => {
+    await customersApi.update(id, data);
+    toast.success("Customer updated!");
+    setSelected(current => (current?.cust_id === id ? { ...current, ...data } : current));
+    load();
   };
 
   const filtered = customers.filter(c =>
@@ -221,6 +245,10 @@ export default function CustomersPage() {
                     onClick={e => { e.stopPropagation(); setSelected(cust); }}>
                     <Eye size={12} /> View
                   </button>
+                  <button className="flex-1 py-1.5 border-2 border-nb-ink rounded-lg text-xs font-bold bg-nb-bg hover:bg-nb-warn hover:text-white transition-colors flex items-center justify-center gap-1"
+                    onClick={e => { e.stopPropagation(); setEditing(cust); }}>
+                    <Pencil size={12} /> Edit
+                  </button>
                   <button className="flex-1 py-1.5 border-2 border-nb-ink rounded-lg text-xs font-bold bg-nb-bg hover:bg-nb-error hover:text-white transition-colors flex items-center justify-center gap-1"
                     onClick={e => { e.stopPropagation(); handleDelete(cust.cust_id); }}>
                     <Trash2 size={12} /> Delete
@@ -231,8 +259,25 @@ export default function CustomersPage() {
           })}
         </div>
       )}
-      {selected && <CustomerDetailModal cust={selected} onClose={() => setSelected(null)} onDelete={handleDelete} />}
-      {adding && <AddCustomerModal onClose={() => setAdding(false)} onCreated={load} />}
+      {selected && <CustomerDetailModal cust={selected} onClose={() => setSelected(null)} onDelete={handleDelete} onEdit={(cust) => { setSelected(null); setEditing(cust); }} />}
+      {adding && (
+        <CustomerFormModal
+          title="Add Customer"
+          submitLabel="Add Customer"
+          initialCustomer={null}
+          onClose={() => setAdding(false)}
+          onSubmit={handleCreate}
+        />
+      )}
+      {editing && (
+        <CustomerFormModal
+          title={`Edit Customer #${editing.cust_id}`}
+          submitLabel="Save Changes"
+          initialCustomer={editing}
+          onClose={() => setEditing(null)}
+          onSubmit={(data) => handleUpdate(editing.cust_id, data)}
+        />
+      )}
     </div>
   );
 }
