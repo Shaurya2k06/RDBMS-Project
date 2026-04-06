@@ -82,12 +82,12 @@ INSERT INTO bookings (cust_id, show_id, booking_date, booking_status) VALUES
   (1, 5, '2026-03-30', 'Cancelled');
 
 -- REVIEWS
-INSERT INTO reviews (cust_id, rating) VALUES
-  (1, 5),
-  (2, 4),
-  (3, 5),
-  (4, 3),
-  (5, 4);
+INSERT INTO reviews (cust_id, show_id, rating) VALUES
+  (1, 1, 5),
+  (2, 1, 4),
+  (3, 2, 5),
+  (4, 3, 3),
+  (5, 4, 4);
 
 -- JUNCTION TABLES
 
